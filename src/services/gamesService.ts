@@ -163,7 +163,8 @@ export const fetchGames = async (): Promise<Game[]> => {
       version: version,
       protectors: protectors.join(', '),
       isPlayed: cswRow.wishlist === '1',
-      isPlayedOnlineOnly: cswRow.wishlistpriority === '3',
+      isPlayedOnlineOnly:
+        cswRow.wishlist === '1' && cswRow.wishlistpriority === '3',
       rank: cswRow.rank !== '0' ? Number(cswRow.rank) : undefined,
       maxPlayers: Number(cswRow.maxplayers),
       bestPlayers:
