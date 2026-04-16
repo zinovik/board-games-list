@@ -17,6 +17,7 @@ const Filter: React.FC<FilterProps> = ({
     { value: 'brest', label: 'Owned Brest' },
     { value: 'warszawa', label: 'Owned Warszawa' },
     { value: 'is_played', label: 'Played' },
+    { value: 'is_not_played', label: 'Not played' },
     { value: 'is_played_online_only', label: 'Played online only' },
     { value: 'is_base_game', label: 'Base game' },
     { value: 'is_expansion', label: 'Expansion' },

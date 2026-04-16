@@ -8,7 +8,8 @@ interface ListProps {
 }
 
 const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
-  const [sortBy, setSortBy] = useState('rank');
+  const [sortBy, setSortBy] = useState<keyof Game>('rank');
+  const [order, setOrder] = useState<'ASC' | 'DESC'>('ASC');
 
   const checkFilter = (game: Game, filter: string): boolean => {
     switch (filter) {
@@ -20,6 +21,8 @@ const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
         return game.ownedCity === 'Warszawa';
       case 'is_played':
         return game.isPlayed;
+      case 'is_not_played':
+        return !game.isPlayed;
       case 'is_played_online_only':
         return game.isPlayedOnlineOnly;
       case 'is_base_game':
@@ -39,7 +42,7 @@ const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
     }
   };
 
-  const filteredGames = (
+  const filteredGames =
     filters.length === 0
       ? games
       : games.filter((game) => {
@@ -48,21 +51,17 @@ const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
           } else {
             return filters.some((filter) => checkFilter(game, filter));
           }
-        })
-  ).sort((a, b) => {
-    switch (sortBy) {
-      case 'rank':
-        return (a.rank ?? 99999) - (b.rank ?? 99999);
-      case 'weight':
-        return (a.weight ?? 99999) - (b.weight ?? 99999);
-      case 'maxPlayers':
-        return (a.maxPlayers ?? 99999) - (b.maxPlayers ?? 99999);
-      case 'bestPlayers':
-        return (a.bestPlayers ?? 99999) - (b.bestPlayers ?? 99999);
-      case 'playTime':
-        return (a.playingTime ?? 99999) - (b.playingTime ?? 99999);
-      default:
-        return 0;
+        });
+
+  const sortedGames = filteredGames.sort((a, b) => {
+    if (!a[sortBy] && !b[sortBy]) return 0;
+    if (!a[sortBy]) return 1;
+    if (!b[sortBy]) return -1;
+
+    if (order === 'ASC') {
+      return Number(a[sortBy]) - Number(b[sortBy]);
+    } else {
+      return Number(b[sortBy]) - Number(a[sortBy]);
     }
   });
 
@@ -70,35 +69,68 @@ const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
     <div className="list">
       <div>
         Sort by:
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as keyof Game)}
+        >
           <option value="rank">Rank</option>
           <option value="weight">Weight</option>
           <option value="maxPlayers">Max Players</option>
           <option value="bestPlayers">Best Players</option>
-          <option value="playTime">Play Time</option>
+          <option value="playingTime">Play Time</option>
         </select>
+        <div style={{ marginBottom: '10px' }}>
+          <label>
+            <input
+              type="radio"
+              name="order"
+              value="ASC"
+              checked={order === 'ASC'}
+              onChange={() => setOrder('ASC')}
+            />
+            ASC (lowest first)
+          </label>
+          <label style={{ marginLeft: '15px' }}>
+            <input
+              type="radio"
+              name="order"
+              value="DESC"
+              checked={order === 'DESC'}
+              onChange={() => setOrder('DESC')}
+            />
+            DESC (highest first)
+          </label>
+        </div>
       </div>
-      <div>Items: {filteredGames.length}</div>
+      <div>Items: {sortedGames.length}</div>
       <ul>
-        {filteredGames.map((game, index) => (
-          <li key={index}>
-            {game.rank ? `${game.rank}. ` : ''}
-            <a
-              href={`https://boardgamegeek.com/boardgame/${game.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {game.name} ({game.year})
-            </a>
-            {game.isExpansion ? ' [Expansion]' : ''}
-            {game.ownedCity ? `, owned in ${game.ownedCity}` : ''}
-            {game.version ? `, ${game.version}` : ''}
-            {game.protectors ? `, ${game.protectors}` : ''}
-            {game.isPlayedOnlineOnly ? `, played Online Only` : ''}
-            {!game.isPlayedOnlineOnly && game.isPlayed ? `, played` : ''}, w:{' '}
-            {game.weight}, mp: {game.maxPlayers}, bp: {game.bestPlayers}, pt:{' '}
-            {game.playingTime}
-          </li>
+        {sortedGames.map((game) => (
+          <div
+            className="row"
+            key={`${game.name}${game.id}`}
+            title={game.protectors}
+          >
+            <div className="cell rank">{game.rank ? `${game.rank}. ` : ''}</div>
+            <div className="cell game">
+              <a
+                href={`https://boardgamegeek.com/${
+                  game.id
+                    ? `boardgame/${game.id}`
+                    : `geeksearch.php?action=search&objecttype=boardgame&q=${game.name}`
+                }`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >{`${game.name} (${game.year})`}</a>
+            </div>
+            <div className="cell sites">
+              {game.ownedCity ? ` [${game.ownedCity}]` : ''}
+              {game.version ? ` [${game.version.split(' ')[0]}]` : ''}
+              {game.isPlayedOnlineOnly ? `[online]` : ''}
+              {game.weight ? ` [${game.weight}]` : ''} {game.bestPlayers || '?'}
+              /{game.maxPlayers}
+              {game.playingTime ? ` ${game.playingTime}m` : ''}
+            </div>
+          </div>
         ))}
       </ul>
     </div>
