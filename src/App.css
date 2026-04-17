@@ -60,3 +60,16 @@
   flex-grow: 100;
   flex-shrink: 100;
 }
+
+.content {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 100;
+  flex-shrink: 100;
+}
+
+@media (max-width: 600px) {
+  .content {
+    flex-direction: column;
+  }
+}

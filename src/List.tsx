@@ -111,24 +111,26 @@ const List: React.FC<ListProps> = ({ games, filters, filterMode = 'OR' }) => {
             title={game.protectors}
           >
             <div className="cell rank">{game.rank ? `${game.rank}. ` : ''}</div>
-            <div className="cell game">
-              <a
-                href={`https://boardgamegeek.com/${
-                  game.id
-                    ? `boardgame/${game.id}`
-                    : `geeksearch.php?action=search&objecttype=boardgame&q=${game.name}`
-                }`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >{`${game.name} (${game.year})`}</a>
-            </div>
-            <div className="cell sites">
-              {game.ownedCity ? ` [${game.ownedCity}]` : ''}
-              {game.version ? ` [${game.version.split(' ')[0]}]` : ''}
-              {game.isPlayedOnlineOnly ? `[online]` : ''}
-              {game.weight ? ` [${game.weight}]` : ''} {game.bestPlayers || '?'}
-              /{game.maxPlayers}
-              {game.playingTime ? ` ${game.playingTime}m` : ''}
+            <div className="cell content">
+              <div className="cell game">
+                <a
+                  href={`https://boardgamegeek.com/${
+                    game.id
+                      ? `boardgame/${game.id}`
+                      : `geeksearch.php?action=search&objecttype=boardgame&q=${game.name}`
+                  }`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >{`${game.name} (${game.year})`}</a>
+              </div>
+              <div className="cell sites">
+                {game.ownedCity ? ` [${game.ownedCity}]` : ''}
+                {game.version ? ` [${game.version.split(' ')[0]}]` : ''}
+                {game.isPlayedOnlineOnly ? `[online]` : ''}
+                {game.weight ? ` [${game.weight}]` : ''}{' '}
+                {game.bestPlayers || '?'}/{game.maxPlayers}
+                {game.playingTime ? ` ${game.playingTime}m` : ''}
+              </div>
             </div>
           </div>
         ))}
