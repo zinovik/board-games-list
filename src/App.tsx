@@ -10,6 +10,7 @@ const FILTERS_URL_PARAMETER = 'filters';
 const MODE_URL_PARAMETER = 'mode';
 const SORT_URL_PARAMETER = 'sort';
 const ORDER_URL_PARAMETER = 'order';
+const IS_FILTER_AND_SORT_HIDDEN = 'hidden';
 
 function App() {
   const [games, setGames] = useState<Game[]>();
@@ -31,14 +32,23 @@ function App() {
   const mode = searchParams.get(MODE_URL_PARAMETER) as Mode | null;
   const sort = searchParams.get(SORT_URL_PARAMETER) as SortValue | null;
   const order = searchParams.get(ORDER_URL_PARAMETER) as Order | null;
+  const isFilterAndSortHidden =
+    searchParams.get(IS_FILTER_AND_SORT_HIDDEN) === 'true';
 
   const setUrlParams = (
     filters: FilterValue[],
     mode: Mode,
     sort: SortValue,
     order: Order,
+    isFilterAndSortHidden: boolean,
   ) => {
-    setSearchParams({ filters: filters.join(','), mode, sort, order });
+    setSearchParams({
+      [FILTERS_URL_PARAMETER]: filters.join(','),
+      [MODE_URL_PARAMETER]: mode,
+      [SORT_URL_PARAMETER]: sort,
+      [ORDER_URL_PARAMETER]: order,
+      [IS_FILTER_AND_SORT_HIDDEN]: isFilterAndSortHidden.toString(),
+    });
   };
 
   return (
@@ -48,6 +58,7 @@ function App() {
         mode={mode}
         sort={sort}
         order={order}
+        isFilterAndSortHidden={isFilterAndSortHidden}
         onChange={setUrlParams}
       />
 

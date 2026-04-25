@@ -19,17 +19,19 @@ const checkFilter = (game: Game, filter: FilterValue): boolean => {
       return game.ownedCity === Cities.Brest;
     case 'warszawa':
       return game.ownedCity === Cities.Warszawa;
-    case 'is_played':
+    case 'not_owned':
+      return !game.ownedCity;
+    case 'played':
       return game.isPlayed;
-    case 'is_played_at_least_offline':
+    case 'played_at_least_offline':
       return game.isPlayed && !game.isPlayedOnlineOnly;
-    case 'is_not_played':
+    case 'not_played':
       return !game.isPlayed;
-    case 'is_played_online_only':
+    case 'played_online_only':
       return game.isPlayedOnlineOnly;
-    case 'is_base_game':
+    case 'base_game':
       return !game.isExpansion;
-    case 'is_expansion':
+    case 'expansion':
       return game.isExpansion;
     case 'weight_lte_3':
       return game.weight <= 3;
@@ -45,6 +47,8 @@ const checkFilter = (game: Game, filter: FilterValue): boolean => {
       return game.bestPlayers >= 3.5;
     case 'duels':
       return game.maxPlayers === 2;
+    case 'max_players_gte_3':
+      return game.maxPlayers >= 3;
     case 'max_players_gte_5':
       return game.maxPlayers >= 5;
     case 'playing_time_lte_60':
