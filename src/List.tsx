@@ -1,62 +1,79 @@
 import React from 'react';
 import type { Game } from './types';
-import { Cities, Mode, Order } from './types';
-import type { FilterValue, SortValue } from './options';
+import { Cities, Order } from './types';
+import { filterOptions, type FilterValue, type SortValue } from './options';
 
 interface ListProps {
   games: Game[];
   filters: FilterValue[];
-  mode: Mode;
   sort: SortValue;
   order: Order;
 }
 
 const checkFilter = (game: Game, filter: FilterValue): boolean => {
   switch (filter) {
-    case 'owned':
-      return Boolean(game.ownedCity);
     case 'brest':
       return game.ownedCity === Cities.Brest;
     case 'warszawa':
       return game.ownedCity === Cities.Warszawa;
     case 'not_owned':
       return !game.ownedCity;
-    case 'played':
-      return game.isPlayed;
     case 'played_at_least_offline':
       return game.isPlayed && !game.isPlayedOnlineOnly;
-    case 'not_played':
-      return !game.isPlayed;
     case 'played_online_only':
       return game.isPlayedOnlineOnly;
+    case 'not_played':
+      return !game.isPlayed;
     case 'base_game':
       return !game.isExpansion;
     case 'expansion':
       return game.isExpansion;
-    case 'weight_lte_3':
-      return game.weight <= 3;
-    case 'weight_3_4':
-      return game.weight >= 3 && game.weight <= 4;
-    case 'weight_gte_4':
-      return game.weight >= 4;
+    case 'weight_1_1.5':
+      return game.weight >= 1 && game.weight < 1.5;
+    case 'weight_1.5_2':
+      return game.weight >= 1.5 && game.weight < 2;
+    case 'weight_2_2.5':
+      return game.weight >= 2 && game.weight < 2.5;
+    case 'weight_2.5_3':
+      return game.weight >= 2.5 && game.weight < 3;
+    case 'weight_3_3.5':
+      return game.weight >= 3 && game.weight < 3.5;
+    case 'weight_3.5_4':
+      return game.weight >= 3.5 && game.weight < 4;
+    case 'weight_4_4.5':
+      return game.weight >= 4 && game.weight < 4.5;
+    case 'weight_4.5_plus':
+      return game.weight >= 4.5;
     case 'best_at_2':
-      return game.bestPlayers >= 1.5 && game.bestPlayers <= 2.5;
+      return game.bestPlayers >= 1.5 && game.bestPlayers < 2.5;
     case 'best_at_3':
-      return game.bestPlayers >= 2.5 && game.bestPlayers <= 3.5;
+      return game.bestPlayers >= 2.5 && game.bestPlayers < 3.5;
     case 'best_at_4_plus':
       return game.bestPlayers >= 3.5;
     case 'duels':
       return game.maxPlayers === 2;
-    case 'max_players_gte_3':
-      return game.maxPlayers >= 3;
+    case 'max_players_3':
+      return game.maxPlayers === 3;
+    case 'max_players_4':
+      return game.maxPlayers === 4;
+    case 'max_players_5':
+      return game.maxPlayers === 5;
+    case 'max_players_6_plus':
+      return game.maxPlayers >= 6;
     case 'max_players_gte_5':
       return game.maxPlayers >= 5;
-    case 'playing_time_lte_60':
-      return game.playingTime <= 60;
-    case 'playing_time_60_120':
-      return game.playingTime >= 60 && game.playingTime <= 120;
-    case 'playing_time_gte_120':
-      return game.playingTime >= 120;
+    case 'playing_time_lte_30':
+      return game.playingTime < 30;
+    case 'playing_time_30_60':
+      return game.playingTime >= 30 && game.playingTime < 60;
+    case 'playing_time_60_90':
+      return game.playingTime >= 60 && game.playingTime < 90;
+    case 'playing_time_90_120':
+      return game.playingTime >= 90 && game.playingTime < 120;
+    case 'playing_time_120_180':
+      return game.playingTime >= 120 && game.playingTime < 180;
+    case 'playing_time_180_plus':
+      return game.playingTime >= 180;
     case 'boardgamearena':
       return Boolean(game.boardGameArena);
     case 'yucata':
@@ -75,15 +92,18 @@ const buildUrl = (name: string, id?: number) =>
 const formatBestPlayers = (n: number) =>
   Number.isInteger(n) ? `${n}` : `${Math.floor(n)}-${Math.floor(n) + 1}`;
 
-const List: React.FC<ListProps> = ({ games, filters, mode, sort, order }) => {
-  const filteredGames =
-    filters.length === 0
-      ? []
-      : games.filter((game) =>
-          mode === Mode.and
-            ? filters.every((filter) => checkFilter(game, filter))
-            : filters.some((filter) => checkFilter(game, filter)),
-        );
+const List: React.FC<ListProps> = ({ games, filters, sort, order }) => {
+  const selectedFilterOptions = filterOptions
+    .map((group) =>
+      group.options.filter((option) => filters.includes(option.value)),
+    )
+    .filter((options) => options.length > 0);
+
+  const filteredGames = games.filter((game) =>
+    selectedFilterOptions.every((options) =>
+      options.some((option) => checkFilter(game, option.value)),
+    ),
+  );
 
   const sortedGames = filteredGames.sort((a, b) => {
     if (!a[sort] && !b[sort]) return 0;

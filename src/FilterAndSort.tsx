@@ -1,8 +1,7 @@
 import React from 'react';
-import { Mode, Order } from './types';
+import { Order } from './types';
 import {
   filterOptions,
-  modeOptions,
   orderOptions,
   sortOptions,
   type FilterValue,
@@ -11,13 +10,11 @@ import {
 
 interface FilterAndSortProps {
   filters: FilterValue[] | null;
-  mode: Mode | null;
   sort: SortValue | null;
   order: Order | null;
   isFilterAndSortHidden: boolean;
   onChange: (
     filters: FilterValue[],
-    mode: Mode,
     sort: SortValue,
     order: Order,
     isFilterAndSortHidden: boolean,
@@ -26,16 +23,14 @@ interface FilterAndSortProps {
 
 const FilterAndSort: React.FC<FilterAndSortProps> = ({
   filters,
-  mode,
   sort,
   order,
   isFilterAndSortHidden,
   onChange,
 }) => {
-  if (!filters || !mode || !sort || !order) {
+  if (!filters || !sort || !order) {
     onChange(
-      ['played'],
-      Mode.and,
+      ['base_game'],
       sortOptions[0].value,
       Order.asc,
       isFilterAndSortHidden,
@@ -48,20 +43,17 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
       ? filters.filter((f) => f !== value)
       : [...filters, value];
 
-    onChange(newFilters, mode, sort, order, isFilterAndSortHidden);
+    onChange(newFilters, sort, order, isFilterAndSortHidden);
   };
 
-  const handleModeChange = (mode: Mode) =>
-    onChange(filters, mode, sort, order, isFilterAndSortHidden);
-
   const setSort = (sort: SortValue) =>
-    onChange(filters, mode, sort, order, isFilterAndSortHidden);
+    onChange(filters, sort, order, isFilterAndSortHidden);
 
   const setOrder = (order: Order) =>
-    onChange(filters, mode, sort, order, isFilterAndSortHidden);
+    onChange(filters, sort, order, isFilterAndSortHidden);
 
   const handleIsFilterAndSortHiddenChange = (isFilterAndSortHidden: boolean) =>
-    onChange(filters, mode, sort, order, isFilterAndSortHidden);
+    onChange(filters, sort, order, isFilterAndSortHidden);
 
   return (
     <>
@@ -74,29 +66,26 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
               paddingBottom: '10px',
             }}
           >
-            {filterOptions.map((item) => (
-              <label key={item.value}>
-                <input
-                  type="checkbox"
-                  checked={filters.includes(item.value)}
-                  onChange={() => handleCheckboxChange(item.value)}
-                />
-                {item.label}
-              </label>
-            ))}
-          </div>
-
-          <div style={{ paddingBottom: '10px' }}>
-            <label>Mode:</label>
-            {modeOptions.map(({ value, label }) => (
-              <label>
-                <input
-                  type="radio"
-                  checked={mode === value}
-                  onChange={() => handleModeChange(value)}
-                />
-                {label}
-              </label>
+            {filterOptions.map((group) => (
+              <div
+                key={group.options[0].value}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  paddingBottom: '10px',
+                }}
+              >
+                {group.options.map((item) => (
+                  <label key={item.value}>
+                    <input
+                      type="checkbox"
+                      checked={filters.includes(item.value)}
+                      onChange={() => handleCheckboxChange(item.value)}
+                    />
+                    {item.label}
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
 
@@ -130,7 +119,20 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
         </>
       )}
 
-      <div>
+      <div style={{ paddingBottom: '10px' }}>
+        Selected filters:{' '}
+        {filters
+          .map(
+            (f) =>
+              filterOptions.flatMap((o) => o.options).find((o) => o.value === f)
+                ?.label,
+          )
+          .join(', ')}{' '}
+        | Sort: {sortOptions.find((o) => o.value === sort)?.label} | Order:{' '}
+        {orderOptions.find((o) => o.value === order)?.label}
+      </div>
+
+      <div style={{ paddingBottom: '10px' }}>
         <label>
           <input
             type="checkbox"

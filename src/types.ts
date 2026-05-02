@@ -22,13 +22,6 @@ export interface Game {
   yucata?: string;
 }
 
-export const Mode = {
-  and: 'and',
-  or: 'or',
-} as const;
-
-export type Mode = (typeof Mode)[keyof typeof Mode];
-
 export const Order = {
   asc: 'asc',
   desc: 'desc',
