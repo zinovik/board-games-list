@@ -20,6 +20,7 @@ export interface Game {
   playingTime: number;
   boardGameArena?: string;
   yucata?: string;
+  numOwned: number;
 }
 
 export const Order = {

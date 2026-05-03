@@ -40,8 +40,6 @@ export const fetchGames = async (): Promise<Game[]> => {
 
     const digitalGameUrls = digitalGames[cswRow.objectname] ?? [];
 
-    console.log(digitalGameUrls.find((url) => url.includes('boardgamearena')));
-
     return {
       name: cswRow.objectname,
       year: Number(cswRow.yearpublished),
@@ -68,6 +66,7 @@ export const fetchGames = async (): Promise<Game[]> => {
         url.includes('boardgamearena'),
       ),
       yucata: digitalGameUrls.find((url) => url.includes('yucata')),
+      numOwned: Number(cswRow.numowned),
     };
   });
 };
