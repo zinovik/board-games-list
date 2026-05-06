@@ -1,5 +1,4 @@
 import React from 'react';
-import { Order } from './types';
 import {
   filterOptions,
   orderOptions,
@@ -11,30 +10,28 @@ import {
 interface FilterAndSortProps {
   filters: FilterValue[] | null;
   sort: SortValue | null;
-  order: Order | null;
-  isFilterAndSortHidden: boolean;
+  isAscOrder: boolean;
+  shouldShowImages: boolean;
+  isFiltersHidden: boolean;
   onChange: (
     filters: FilterValue[],
     sort: SortValue,
-    order: Order,
-    isFilterAndSortHidden: boolean,
+    isAscOrder: boolean,
+    shouldShowImages: boolean,
+    isFiltersHidden: boolean,
   ) => void;
 }
 
 const FilterAndSort: React.FC<FilterAndSortProps> = ({
   filters,
   sort,
-  order,
-  isFilterAndSortHidden,
+  isAscOrder,
+  shouldShowImages,
+  isFiltersHidden,
   onChange,
 }) => {
-  if (!filters || !sort || !order) {
-    onChange(
-      ['base_game'],
-      sortOptions[0].value,
-      Order.asc,
-      isFilterAndSortHidden,
-    ); // defaults
+  if (!filters || !sort) {
+    onChange(['base_game'], sortOptions[0].value, true, false, false); // defaults
     return null;
   }
 
@@ -43,27 +40,32 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
       ? filters.filter((f) => f !== value)
       : [...filters, value];
 
-    onChange(newFilters, sort, order, isFilterAndSortHidden);
+    onChange(newFilters, sort, isAscOrder, shouldShowImages, isFiltersHidden);
   };
 
-  const setSort = (sort: SortValue) =>
-    onChange(filters, sort, order, isFilterAndSortHidden);
+  const setSort = (sort: SortValue, prevValue: SortValue) =>
+    onChange(
+      filters,
+      sort,
+      sort === prevValue ? !isAscOrder : isAscOrder,
+      shouldShowImages,
+      isFiltersHidden,
+    );
 
-  const setOrder = (order: Order) =>
-    onChange(filters, sort, order, isFilterAndSortHidden);
+  const handleShouldShowImagesChange = (shouldShowImages: boolean) =>
+    onChange(filters, sort, isAscOrder, shouldShowImages, isFiltersHidden);
 
-  const handleIsFilterAndSortHiddenChange = (isFilterAndSortHidden: boolean) =>
-    onChange(filters, sort, order, isFilterAndSortHidden);
+  const handleIsFiltersHiddenChange = (isFiltersHidden: boolean) =>
+    onChange(filters, sort, isAscOrder, shouldShowImages, isFiltersHidden);
 
   return (
     <>
-      {!isFilterAndSortHidden && (
+      {!isFiltersHidden && (
         <>
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              paddingBottom: '10px',
             }}
           >
             {filterOptions.map((group) => (
@@ -88,36 +90,19 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
               </div>
             ))}
           </div>
-
-          <div style={{ paddingBottom: '10px' }}>
-            <label>Sort:</label>
-            {sortOptions.map(({ value, label }) => (
-              <label>
-                <input
-                  type="radio"
-                  checked={sort === value}
-                  onChange={() => setSort(value)}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-
-          <div style={{ paddingBottom: '10px' }}>
-            <label>Order:</label>
-            {orderOptions.map(({ value, label }) => (
-              <label>
-                <input
-                  type="radio"
-                  checked={order === value}
-                  onChange={() => setOrder(value)}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
         </>
       )}
+
+      <div style={{ paddingBottom: '10px' }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={isFiltersHidden}
+            onChange={() => handleIsFiltersHiddenChange(!isFiltersHidden)}
+          />
+          Filters are hidden
+        </label>
+      </div>
 
       <div style={{ paddingBottom: '10px' }}>
         Selected filters:{' '}
@@ -127,21 +112,33 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
               filterOptions.flatMap((o) => o.options).find((o) => o.value === f)
                 ?.label,
           )
-          .join(', ')}{' '}
-        | Sort: {sortOptions.find((o) => o.value === sort)?.label} | Order:{' '}
-        {orderOptions.find((o) => o.value === order)?.label}
+          .join(', ')}
+      </div>
+
+      <div style={{ paddingBottom: '10px' }}>
+        <label>
+          Sort {orderOptions.find((o) => o.value === isAscOrder)?.label}:
+        </label>
+        {sortOptions.map(({ value, label }) => (
+          <label>
+            <input
+              type="radio"
+              checked={sort === value}
+              onClick={() => setSort(value, sort)}
+            />
+            {label}
+          </label>
+        ))}
       </div>
 
       <div style={{ paddingBottom: '10px' }}>
         <label>
           <input
             type="checkbox"
-            checked={isFilterAndSortHidden}
-            onChange={() =>
-              handleIsFilterAndSortHiddenChange(!isFilterAndSortHidden)
-            }
+            checked={shouldShowImages}
+            onChange={() => handleShouldShowImagesChange(!shouldShowImages)}
           />
-          Filters and Sort are hidden
+          Show images
         </label>
       </div>
     </>

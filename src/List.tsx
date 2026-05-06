@@ -1,13 +1,13 @@
 import React from 'react';
 import type { Game } from './types';
-import { Order } from './types';
 import { filterOptions, type FilterValue, type SortValue } from './options';
 
 interface ListProps {
   games: Game[];
   filters: FilterValue[];
   sort: SortValue;
-  order: Order;
+  isAscOrder: boolean;
+  shouldShowImages: boolean;
 }
 
 const buildUrl = (name: string, id?: number) =>
@@ -18,7 +18,13 @@ const buildUrl = (name: string, id?: number) =>
 const formatBestPlayers = (n: number) =>
   Number.isInteger(n) ? `${n}` : `${Math.floor(n)}-${Math.floor(n) + 1}`;
 
-const List: React.FC<ListProps> = ({ games, filters, sort, order }) => {
+const List: React.FC<ListProps> = ({
+  games,
+  filters,
+  sort,
+  isAscOrder,
+  shouldShowImages,
+}) => {
   const selectedFilterOptions = filterOptions
     .map((group) => ({
       check: group.check,
@@ -37,7 +43,7 @@ const List: React.FC<ListProps> = ({ games, filters, sort, order }) => {
     if (!a[sort]) return 1;
     if (!b[sort]) return -1;
 
-    return order === Order.asc
+    return isAscOrder
       ? Number(a[sort]) - Number(b[sort])
       : Number(b[sort]) - Number(a[sort]);
   });
@@ -52,6 +58,22 @@ const List: React.FC<ListProps> = ({ games, filters, sort, order }) => {
           key={`${game.name}${game.id}`}
           title={`${game.version}\n${game.protectors}`}
         >
+          {shouldShowImages && (
+            <img
+              src={`/board-games-list/images/${game.id}.jpg`}
+              style={{
+                display: 'block',
+                paddingTop: '2px',
+                paddingBottom: '2px',
+                paddingLeft: '2px',
+                paddingRight: '10px',
+                maxWidth: '120px',
+                maxHeight: '120px',
+              }}
+              alt="🎲"
+            />
+          )}
+
           <div style={{ width: '3rem' }}>
             {game.rank ? `${game.rank}. ` : ''}
           </div>

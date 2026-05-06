@@ -3,13 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import FilterAndSort from './FilterAndSort';
 import List from './List';
 import { fetchGames } from './services/gamesService';
-import type { Game, Order } from './types';
+import type { Game } from './types';
 import type { FilterValue, SortValue } from './options';
 
 const FILTERS_URL_PARAMETER = 'filters';
 const SORT_URL_PARAMETER = 'sort';
-const ORDER_URL_PARAMETER = 'order';
-const IS_FILTER_AND_SORT_HIDDEN = 'hidden';
+const IS_ASC_ORDER_URL_PARAMETER = 'asc';
+const SHOULD_SHOW_IMAGES_URL_PARAMETER = 'images';
+const IS_FILTERS_HIDDEN_URL_PARAMETER = 'hidden';
 
 function App() {
   const [games, setGames] = useState<Game[]>();
@@ -29,21 +30,25 @@ function App() {
       ?.split(',')
       .filter((f) => Boolean(f)) as FilterValue[]) ?? null;
   const sort = searchParams.get(SORT_URL_PARAMETER) as SortValue | null;
-  const order = searchParams.get(ORDER_URL_PARAMETER) as Order | null;
-  const isFilterAndSortHidden =
-    searchParams.get(IS_FILTER_AND_SORT_HIDDEN) === 'true';
+  const isAscOrder = searchParams.get(IS_ASC_ORDER_URL_PARAMETER) === 'true';
+  const shouldShowImages =
+    searchParams.get(SHOULD_SHOW_IMAGES_URL_PARAMETER) === 'true';
+  const isFiltersHidden =
+    searchParams.get(IS_FILTERS_HIDDEN_URL_PARAMETER) === 'true';
 
   const setUrlParams = (
     filters: FilterValue[],
     sort: SortValue,
-    order: Order,
-    isFilterAndSortHidden: boolean,
+    isAscOrder: boolean,
+    shouldShowImages: boolean,
+    isFiltersHidden: boolean,
   ) => {
     setSearchParams({
       [FILTERS_URL_PARAMETER]: filters.join(','),
       [SORT_URL_PARAMETER]: sort,
-      [ORDER_URL_PARAMETER]: order,
-      [IS_FILTER_AND_SORT_HIDDEN]: isFilterAndSortHidden.toString(),
+      [IS_ASC_ORDER_URL_PARAMETER]: isAscOrder.toString(),
+      [SHOULD_SHOW_IMAGES_URL_PARAMETER]: shouldShowImages.toString(),
+      [IS_FILTERS_HIDDEN_URL_PARAMETER]: isFiltersHidden.toString(),
     });
   };
 
@@ -52,15 +57,22 @@ function App() {
       <FilterAndSort
         filters={filters}
         sort={sort}
-        order={order}
-        isFilterAndSortHidden={isFilterAndSortHidden}
+        isAscOrder={isAscOrder}
+        shouldShowImages={shouldShowImages}
+        isFiltersHidden={isFiltersHidden}
         onChange={setUrlParams}
       />
 
-      {!games || !filters || !sort || !order ? (
+      {!games || !filters || !sort ? (
         <div>Loading...</div>
       ) : (
-        <List games={games} filters={filters} sort={sort} order={order} />
+        <List
+          games={games}
+          filters={filters}
+          sort={sort}
+          isAscOrder={isAscOrder}
+          shouldShowImages={shouldShowImages}
+        />
       )}
     </main>
   );

@@ -1,5 +1,5 @@
 import type { Game } from './types';
-import { Cities, Order } from './types';
+import { Cities } from './types';
 
 export const filterOptions: {
   options: { value: string; label: string }[];
@@ -210,7 +210,7 @@ export const sortOptions = [
 
 export type SortValue = (typeof sortOptions)[number]['value'];
 
-export const orderOptions: { value: Order; label: string }[] = [
-  { value: Order.asc, label: 'ASC' },
-  { value: Order.desc, label: 'DESC' },
+export const orderOptions: { value: boolean; label: string }[] = [
+  { value: true, label: '⬇️' },
+  { value: false, label: '⬆️' },
 ] as const;
