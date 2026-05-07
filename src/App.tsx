@@ -7,6 +7,7 @@ import type { Game } from './types';
 import type { FilterValue, SortValue } from './options';
 
 const FILTERS_URL_PARAMETER = 'filters';
+const FILTERS_SPLITTER = '|';
 const SORT_URL_PARAMETER = 'sort';
 const IS_ASC_ORDER_URL_PARAMETER = 'asc';
 const SHOULD_SHOW_IMAGES_URL_PARAMETER = 'images';
@@ -27,7 +28,7 @@ function App() {
   const filters =
     (searchParams
       .get(FILTERS_URL_PARAMETER)
-      ?.split(',')
+      ?.split(FILTERS_SPLITTER)
       .filter((f) => Boolean(f)) as FilterValue[]) ?? null;
   const sort = searchParams.get(SORT_URL_PARAMETER) as SortValue | null;
   const isAscOrder = searchParams.get(IS_ASC_ORDER_URL_PARAMETER) === 'true';
@@ -44,7 +45,7 @@ function App() {
     isFiltersHidden: boolean,
   ) => {
     setSearchParams({
-      [FILTERS_URL_PARAMETER]: filters.join(','),
+      [FILTERS_URL_PARAMETER]: filters.join(FILTERS_SPLITTER),
       [SORT_URL_PARAMETER]: sort,
       [IS_ASC_ORDER_URL_PARAMETER]: isAscOrder.toString(),
       [SHOULD_SHOW_IMAGES_URL_PARAMETER]: shouldShowImages.toString(),

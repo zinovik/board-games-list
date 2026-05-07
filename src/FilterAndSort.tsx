@@ -31,7 +31,13 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
   onChange,
 }) => {
   if (!filters || !sort) {
-    onChange(['base_game'], sortOptions[0].value, true, false, false); // defaults
+    onChange(
+      filters || ['base_game'],
+      sort || sortOptions[0].value,
+      true,
+      true,
+      false,
+    ); // defaults
     return null;
   }
 
@@ -65,17 +71,14 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
           <div
             style={{
               display: 'flex',
+              gap: '10px',
               flexDirection: 'column',
             }}
           >
             {filterOptions.map((group) => (
               <div
                 key={group.options[0].value}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  paddingBottom: '10px',
-                }}
+                style={{ display: 'flex', flexDirection: 'column' }}
               >
                 {group.options.map((item) => (
                   <label key={item.value}>
@@ -93,7 +96,7 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
         </>
       )}
 
-      <div style={{ paddingBottom: '10px' }}>
+      <div style={{ paddingTop: '10px' }}>
         <label>
           <input
             type="checkbox"
@@ -104,7 +107,7 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
         </label>
       </div>
 
-      <div style={{ paddingBottom: '10px' }}>
+      <div style={{ paddingTop: '10px' }}>
         Selected filters:{' '}
         {filters
           .map(
@@ -115,7 +118,7 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
           .join(', ')}
       </div>
 
-      <div style={{ paddingBottom: '10px' }}>
+      <div style={{ paddingTop: '10px' }}>
         <label>
           Sort {orderOptions.find((o) => o.value === isAscOrder)?.label}:
         </label>
@@ -131,8 +134,8 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
         ))}
       </div>
 
-      <div style={{ paddingBottom: '10px' }}>
-        <label>
+      <div style={{ paddingTop: '10px' }}>
+        <label style={{ paddingTop: '10px' }}>
           <input
             type="checkbox"
             checked={shouldShowImages}

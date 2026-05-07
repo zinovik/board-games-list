@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Game } from './types';
 import { filterOptions, type FilterValue, type SortValue } from './options';
 
@@ -9,6 +9,13 @@ interface ListProps {
   isAscOrder: boolean;
   shouldShowImages: boolean;
 }
+
+const BOARD_GAME_ARENA_ICON_URL =
+  'https://raw.githubusercontent.com/zinovik/digital-board-games/refs/heads/main/src/icons/boargamearena.jpg';
+const YUCATA_ICON_URL =
+  'https://raw.githubusercontent.com/zinovik/digital-board-games/refs/heads/main/src/icons/yucata.jpg';
+
+const IMG_WIDTH = 150;
 
 const buildUrl = (name: string, id?: number) =>
   id
@@ -25,6 +32,14 @@ const List: React.FC<ListProps> = ({
   isAscOrder,
   shouldShowImages,
 }) => {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const selectedFilterOptions = filterOptions
     .map((group) => ({
       check: group.check,
@@ -43,93 +58,127 @@ const List: React.FC<ListProps> = ({
     if (!a[sort]) return 1;
     if (!b[sort]) return -1;
 
-    return isAscOrder
-      ? Number(a[sort]) - Number(b[sort])
-      : Number(b[sort]) - Number(a[sort]);
+    return isAscOrder ? a[sort] - b[sort] : b[sort] - a[sort];
   });
+
+  const oneLineMode = !shouldShowImages && windowWidth >= 800;
+
+  const multiLinesMode =
+    (shouldShowImages && windowWidth < 600) || windowWidth < 500 - IMG_WIDTH;
 
   return (
     <>
-      <div>Items: {sortedGames.length}</div>
+      <div style={{ paddingTop: '10px' }}>Items: {sortedGames.length}</div>
 
       {sortedGames.map((game) => (
-        <div
-          style={{ display: 'flex', flexDirection: 'row' }}
+        <div // main game line div
+          style={{ display: 'flex', paddingTop: '12px' }}
           key={`${game.name}${game.id}`}
           title={`${game.version}\n${game.protectors}`}
         >
           {shouldShowImages && (
-            <img
-              src={`/board-games-list/images/${game.id}.jpg`}
+            <div // image div
               style={{
-                display: 'block',
-                paddingTop: '2px',
-                paddingBottom: '2px',
-                paddingLeft: '2px',
+                width: IMG_WIDTH,
                 paddingRight: '10px',
-                maxWidth: '120px',
-                maxHeight: '120px',
+                display: 'flex',
+                justifyContent: 'right',
+                flexShrink: 0,
               }}
-              alt="🎲"
-            />
+            >
+              <img
+                src={`/board-games-list/images/${game.id}.jpg`}
+                style={{
+                  maxWidth: IMG_WIDTH,
+                  maxHeight: IMG_WIDTH,
+                }}
+                alt="🎲"
+              />
+            </div>
           )}
 
-          <div style={{ width: '3rem' }}>
-            {game.rank ? `${game.rank}. ` : ''}
-          </div>
-
-          <div
+          <div // rank, name, platforms div, info, owners div
             style={{
               display: 'flex',
-              flexDirection: window.innerWidth > 800 ? 'row' : 'column',
-              flexGrow: 100,
-              padding: 2,
+              flexDirection: oneLineMode ? 'row' : 'column',
+              flexGrow: oneLineMode ? 100 : 0,
             }}
           >
-            <div style={{ padding: 2, flexGrow: 100 }}>
-              <a
-                href={buildUrl(game.name, game.id)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >{`${game.name} (${game.year})`}</a>
+            <div // rank, name and platforms div
+              style={{
+                display: 'flex',
+                flexDirection: multiLinesMode ? 'column' : 'row',
+                flexGrow: oneLineMode ? 100 : 0,
+              }}
+            >
+              <div // rank div
+                style={{
+                  width: oneLineMode ? '3rem' : 'auto',
+                  paddingRight: oneLineMode || multiLinesMode ? 0 : '10px',
+                  display: 'flex',
+                  flexShrink: 0,
+                  justifyContent: oneLineMode ? 'center' : 'left',
+                }}
+              >
+                {game.rank}
+              </div>
 
-              {game.boardGameArena && (
+              <div // name and platforms div
+                style={{
+                  flexGrow: oneLineMode ? 0 : 100,
+                }}
+              >
                 <a
-                  href={game.boardGameArena}
+                  href={buildUrl(game.name, game.id)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
-                    src="https://raw.githubusercontent.com/zinovik/digital-board-games/refs/heads/main/src/icons/boargamearena.jpg"
-                    style={{
-                      paddingLeft: '10px',
-                      width: '15px',
-                      height: '15px',
-                    }}
-                  />
+                  <strong>{`${game.name} (${game.year})`}</strong>
                 </a>
-              )}
-              {game.yucata && (
-                <a href={game.yucata} target="_blank" rel="noopener noreferrer">
-                  <img
-                    src="https://raw.githubusercontent.com/zinovik/digital-board-games/refs/heads/main/src/icons/yucata.jpg"
-                    style={{
-                      paddingLeft: '10px',
-                      width: '15px',
-                      height: '15px',
-                    }}
-                  />
-                </a>
-              )}
+
+                {[
+                  [game.boardGameArena, BOARD_GAME_ARENA_ICON_URL],
+                  [game.yucata, YUCATA_ICON_URL],
+                ].map(
+                  ([url, iconUrl]) =>
+                    url && (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ paddingLeft: '5px' }}
+                        key={iconUrl}
+                      >
+                        <img
+                          src={iconUrl}
+                          style={{ width: '15px', height: '15px' }}
+                        />
+                      </a>
+                    ),
+                )}
+              </div>
             </div>
 
-            <div style={{ textAlign: 'left' }}>
-              {game.ownedCity ? ` ${game.ownedCity}` : ''}
-              {game.isPlayedOnlineOnly ? `[online]` : ''}
-              <strong>{game.weight ? ` ${game.weight}` : ''}</strong>{' '}
-              {formatBestPlayers(game.bestPlayers) || '?'}/{game.maxPlayers}
-              {game.playingTime ? ` ${game.playingTime}m` : ''} ({game.numOwned}
-              )
+            {/* info and owners div */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: multiLinesMode ? 'column' : 'row',
+                gap: multiLinesMode ? 0 : '10px',
+                paddingLeft: oneLineMode ? '10px' : 0,
+              }}
+            >
+              {/* info div */}
+              <div>
+                {game.ownedCity ? ` ${game.ownedCity}` : ''}
+                {game.isPlayedOnlineOnly ? `[online]` : ''}
+                <strong>{game.weight ? ` ${game.weight}` : ''}</strong>{' '}
+                {formatBestPlayers(game.bestPlayers) || '?'}/{game.maxPlayers}
+                {game.playingTime ? ` ${game.playingTime}m` : ''}
+              </div>
+
+              {/* owners div */}
+              <div>({game.numOwned})</div>
             </div>
           </div>
         </div>
