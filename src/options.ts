@@ -206,6 +206,7 @@ export const sortOptions = [
   { value: 'playingTime', label: 'Play Time' },
   { value: 'year', label: 'Year' },
   { value: 'numOwned', label: 'Number Owned' },
+  { value: 'name', label: 'Name' },
 ] satisfies { value: keyof Game; label: string }[];
 
 export type SortValue = (typeof sortOptions)[number]['value'];

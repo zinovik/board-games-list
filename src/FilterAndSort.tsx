@@ -32,11 +32,11 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
 }) => {
   if (!filters || !sort) {
     onChange(
-      filters || ['base_game'],
+      filters || ['brest', 'warszawa', 'base_game'],
       sort || sortOptions[0].value,
       true,
       true,
-      false,
+      true,
     ); // defaults
     return null;
   }

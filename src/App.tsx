@@ -65,7 +65,7 @@ function App() {
       />
 
       {!games || !filters || !sort ? (
-        <div>Loading...</div>
+        <div style={{ paddingTop: '12px' }}>Loading...</div>
       ) : (
         <List
           games={games}

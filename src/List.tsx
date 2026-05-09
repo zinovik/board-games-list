@@ -58,7 +58,17 @@ const List: React.FC<ListProps> = ({
     if (!a[sort]) return 1;
     if (!b[sort]) return -1;
 
-    return isAscOrder ? a[sort] - b[sort] : b[sort] - a[sort];
+    if (typeof a[sort] === 'string' && typeof b[sort] === 'string') {
+      return isAscOrder
+        ? a[sort].localeCompare(b[sort])
+        : b[sort].localeCompare(a[sort]);
+    }
+
+    if (typeof a[sort] === 'number' && typeof b[sort] === 'number') {
+      return isAscOrder ? a[sort] - b[sort] : b[sort] - a[sort];
+    }
+
+    return 0;
   });
 
   const oneLineMode = !shouldShowImages && windowWidth >= 800;
@@ -82,16 +92,12 @@ const List: React.FC<ListProps> = ({
                 width: IMG_WIDTH,
                 paddingRight: '10px',
                 display: 'flex',
-                justifyContent: 'right',
                 flexShrink: 0,
               }}
             >
               <img
                 src={`/board-games-list/images/${game.id}.jpg`}
-                style={{
-                  maxWidth: IMG_WIDTH,
-                  maxHeight: IMG_WIDTH,
-                }}
+                style={{ maxWidth: IMG_WIDTH }}
                 alt="🎲"
               />
             </div>
@@ -111,17 +117,19 @@ const List: React.FC<ListProps> = ({
                 flexGrow: oneLineMode ? 100 : 0,
               }}
             >
-              <div // rank div
-                style={{
-                  width: oneLineMode ? '3rem' : 'auto',
-                  paddingRight: oneLineMode || multiLinesMode ? 0 : '10px',
-                  display: 'flex',
-                  flexShrink: 0,
-                  justifyContent: oneLineMode ? 'center' : 'left',
-                }}
-              >
-                {game.rank}
-              </div>
+              {(game.rank || oneLineMode) && (
+                <div // rank div
+                  style={{
+                    width: oneLineMode ? '3rem' : 'auto',
+                    paddingRight: oneLineMode || multiLinesMode ? 0 : '10px',
+                    display: 'flex',
+                    flexShrink: 0,
+                    justifyContent: oneLineMode ? 'center' : 'left',
+                  }}
+                >
+                  {game.rank}
+                </div>
+              )}
 
               <div // name and platforms div
                 style={{
