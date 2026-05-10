@@ -92,6 +92,7 @@ const List: React.FC<ListProps> = ({
                 width: IMG_WIDTH,
                 paddingRight: '10px',
                 display: 'flex',
+                justifyContent: 'center',
                 flexShrink: 0,
               }}
             >
