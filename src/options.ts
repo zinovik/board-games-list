@@ -179,6 +179,28 @@ export const filterOptions: {
 
   {
     options: [
+      { value: '2026', label: '2026' },
+      { value: '2025', label: '2025' },
+      { value: '2024', label: '2024' },
+      { value: '2023', label: '2023' },
+      { value: '2022', label: '2022' },
+    ],
+    check: (game: Game, value: string) => {
+      switch (value) {
+        case '2026':
+          return game.year === 2026;
+        case '2025':
+          return game.year === 2025;
+        case '2024':
+          return game.year === 2024;
+        default:
+          return false;
+      }
+    },
+  },
+
+  {
+    options: [
       { value: 'boardgamearena', label: 'BoardGameArena' },
       { value: 'yucata', label: 'Yucata' },
     ],
