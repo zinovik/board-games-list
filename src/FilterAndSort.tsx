@@ -97,7 +97,7 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
       )}
 
       <div style={{ paddingTop: '10px' }}>
-        <label>
+        <label style={{ display: 'flex' }}>
           <input
             type="checkbox"
             checked={isFiltersHidden}
@@ -135,7 +135,7 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
       </div>
 
       <div style={{ paddingTop: '10px' }}>
-        <label style={{ paddingTop: '10px' }}>
+        <label style={{ display: 'flex' }}>
           <input
             type="checkbox"
             checked={shouldShowImages}
