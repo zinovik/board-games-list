@@ -85,6 +85,8 @@ const getImageUrl = async (page, id) => {
 
   const imageUrl = html.match(/"imageurl":"(https:\\\/\\\/[^"]+)"/);
 
+  if (!imageUrl) return null;
+
   return imageUrl[1].replace(/\\\//g, '/');
 };
 
