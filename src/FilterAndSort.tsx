@@ -66,11 +66,21 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
 
   return (
     <>
+      <label style={{ display: 'flex' }}>
+        <input
+          type="checkbox"
+          checked={isFiltersHidden}
+          onChange={() => handleIsFiltersHiddenChange(!isFiltersHidden)}
+        />
+        Filters are hidden
+      </label>
+
       {!isFiltersHidden && (
         <>
           <div
             style={{
               display: 'flex',
+              paddingTop: '10px',
               gap: '10px',
               flexDirection: 'column',
             }}
@@ -95,17 +105,6 @@ const FilterAndSort: React.FC<FilterAndSortProps> = ({
           </div>
         </>
       )}
-
-      <div style={{ paddingTop: '10px' }}>
-        <label style={{ display: 'flex' }}>
-          <input
-            type="checkbox"
-            checked={isFiltersHidden}
-            onChange={() => handleIsFiltersHiddenChange(!isFiltersHidden)}
-          />
-          Filters are hidden
-        </label>
-      </div>
 
       <div style={{ paddingTop: '10px' }}>
         Selected filters:{' '}
