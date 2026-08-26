@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "logo-downloader": "node scripts/logo-downloader.js"
+    "logo-downloader": "node scripts/logo-downloader.js",
+    "logo-downloader-api": "node scripts/logo-downloader-api.js"
   },
   "dependencies": {
     "react": "19.2.5",

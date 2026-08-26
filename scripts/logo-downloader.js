@@ -83,6 +83,13 @@ const getImageUrl = async (page, id) => {
 
   const html = await page.content();
 
+  if (
+    html.includes('Just a moment...') ||
+    html.includes('Enable JavaScript and cookies to continue')
+  ) {
+    throw new Error(`Cloudflare challenge encountered for BGG game ${id}`);
+  }
+
   const imageUrl = html.match(/"imageurl":"(https:\\\/\\\/[^"]+)"/);
 
   if (!imageUrl) return null;
@@ -131,7 +138,7 @@ const main = async () => {
     const outputPath = path.join(OUTPUT_DIR, `${id}.jpg`);
 
     if (await fileExists(outputPath)) {
-      console.log(`Skipping ${id} (already downloaded)`);
+      // console.log(`Skipping ${id} (already downloaded)`);
       continue;
     }
 
