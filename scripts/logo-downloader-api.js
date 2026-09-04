@@ -7,7 +7,7 @@ const CSV_URL =
 const OUTPUT_DIR = './public/images';
 
 // BGG XML API2: max 20 ids per `thing` request, ~5s between requests to
-// avoid 500/503 throttling. https://boardgamegeek.com/wiki/page/BGG_XML_API2
+// avoid 500/503 throttling.
 const BATCH_SIZE = 20;
 const REQUEST_DELAY_MS = 5000;
 
@@ -41,6 +41,7 @@ export const parseCsv = (text) => {
       if (char === '\r' && nextChar === '\n') {
         i += 1;
       }
+
       row.push(field);
       field = '';
       rows.push(row);
@@ -78,20 +79,36 @@ const decodeXmlEntities = (str) =>
     .replace(/&apos;/g, "'")
     .replace(/&amp;/g, '&');
 
-// Pulls id -> image URL out of a /xmlapi2/thing response without needing
-// a full XML parser dependency.
+// Pulls id -> thumbnail URL out of a /xmlapi2/thing response.
+//
+// BGG provides both:
+//   <thumbnail>...</thumbnail>  -> smaller preview image
+//   <image>...</image>          -> full-size image
+//
+// We use the thumbnail to keep the downloaded files much smaller.
 export const parseThingImages = (xml) => {
   const results = new Map();
+
   const itemRegex = /<item\s+[^>]*\bid="(\d+)"[^>]*>([\s\S]*?)<\/item>/g;
+
   let match;
 
   while ((match = itemRegex.exec(xml)) !== null) {
     const [, id, body] = match;
+
+    const thumbnailMatch = body.match(/<thumbnail>([\s\S]*?)<\/thumbnail>/);
+
     const imageMatch = body.match(/<image>([\s\S]*?)<\/image>/);
-    results.set(
-      id,
-      imageMatch ? decodeXmlEntities(imageMatch[1].trim()) : null,
-    );
+
+    // Prefer the thumbnail. Fall back to the full image if no
+    // thumbnail is available.
+    const imageUrl = thumbnailMatch?.[1]
+      ? decodeXmlEntities(thumbnailMatch[1].trim())
+      : imageMatch?.[1]
+        ? decodeXmlEntities(imageMatch[1].trim())
+        : null;
+
+    results.set(id, imageUrl);
   }
 
   return results;
@@ -99,12 +116,10 @@ export const parseThingImages = (xml) => {
 
 const fetchImageUrls = async (ids, attempt = 1) => {
   const url = `https://boardgamegeek.com/xmlapi2/thing?id=${ids.join(',')}`;
+
   const headers = {
-    'User-Agent': 'bgg-collection-image-fetcher/1.0 (personal collection tool)',
+    Authorization: `Bearer ${process.env.BGG_API_TOKEN}`,
   };
-  if (process.env.BGG_API_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.BGG_API_TOKEN}`;
-  }
 
   const res = await fetch(url, { headers });
 
@@ -114,18 +129,21 @@ const fetchImageUrls = async (ids, attempt = 1) => {
         `Gave up after ${attempt} attempts (status ${res.status})`,
       );
     }
+
     const backoff = REQUEST_DELAY_MS * attempt;
+
     console.log(
       `Throttled (status ${res.status}), retrying in ${backoff / 1000}s...`,
     );
+
     await sleep(backoff);
     return fetchImageUrls(ids, attempt + 1);
   }
 
   if (res.status === 401 || res.status === 403) {
     throw new Error(
-      `BGG API rejected the request (status ${res.status}). Register an app and ` +
-        'set BGG_API_TOKEN - see https://boardgamegeek.com/applications',
+      `BGG API rejected the request (status ${res.status}). ` +
+        'Register an app and set BGG_API_TOKEN.',
     );
   }
 
@@ -134,52 +152,61 @@ const fetchImageUrls = async (ids, attempt = 1) => {
   }
 
   const xml = await res.text();
+
   return parseThingImages(xml);
 };
 
 const downloadImage = async (url, dest) => {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed image download: ${res.status}`);
+
+  if (!res.ok) {
+    throw new Error(`Failed image download: ${res.status}`);
+  }
 
   const buffer = Buffer.from(await res.arrayBuffer());
+
   await fs.writeFile(dest, buffer);
 };
 
 const main = async () => {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
-  if (!process.env.BGG_API_TOKEN) {
-    console.log(
-      'Warning: BGG_API_TOKEN not set. BGG requires a registered app + token ' +
-        'for the XML API (https://boardgamegeek.com/applications) - requests ' +
-        'may be rejected or heavily throttled without one.',
-    );
+  console.log('Downloading CSV...');
+
+  const res = await fetch(CSV_URL);
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch CSV: ${res.status}`);
   }
 
-  console.log('Downloading CSV...');
-  const res = await fetch(CSV_URL);
-  if (!res.ok) throw new Error(`Failed to fetch CSV: ${res.status}`);
   const csvText = await res.text();
 
   const allIds = parseCsv(csvText)
     .slice(1)
     .map((line) => line[1]?.trim())
     .filter(Boolean);
+
   console.log(`Found ${allIds.length} IDs`);
 
   const pending = [];
+
   for (const id of allIds) {
     const outputPath = path.join(OUTPUT_DIR, `${id}.jpg`);
+
     if (!(await fileExists(outputPath))) {
       pending.push(id);
     }
   }
+
   console.log(`${pending.length} images left to download`);
 
   for (let i = 0; i < pending.length; i += BATCH_SIZE) {
     const batch = pending.slice(i, i + BATCH_SIZE);
+
     console.log(
-      `Batch ${i / BATCH_SIZE + 1}: ids ${batch[0]}..${batch[batch.length - 1]}`,
+      `Batch ${i / BATCH_SIZE + 1}: ids ${
+        batch[0]
+      }..${batch[batch.length - 1]}`,
     );
 
     try {
